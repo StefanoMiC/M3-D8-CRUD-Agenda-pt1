@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+        integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
+
+    <title>Hello, world!</title>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Strive CRUD Agenda</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+            aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+            <div class="navbar-nav">
+                <a class="nav-link active" href="#">Home <span class="sr-only">(current)</span></a>
+                <a class="nav-link" href="./backoffice.html">Backoffice</a>
+            </div>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <h2 class="mt-5 mb-3">Backoffice </h2>
+                <form onsubmit="handleSubmit(event)">
+                    <div class="form-group">
+                        <label for="name">Event Name</label>
+                        <input id="name" type="text" class="form-control" aria-describedby="name field" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Event Description</label>
+                        <input id="description" type="textarea" rows="6" class="form-control"
+                            aria-describedby="event description field" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="price">Event Ticket Price</label>
+                        <input id="price" type="number" class="form-control" aria-describedby="ticket price field"
+                            required>
+                    </div>
+                    <div class="form-group">
+                        <label for="time">Event Date and Time</label>
+                        <input id="time" type="datetime-local" class="form-control"
+                            aria-describedby="date and time field" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        //     OBJ MODEL
+        // {
+        //     "name": "Appointment 5",
+        //     "description": "Test appointment for morning lecture",
+        //     "price": 50,
+        //     "time": "2021-05-26T08:14:00.000Z"
+        // }
+
+        const handleSubmit = async (event) => {
+            event.preventDefault()
+            // this is stopping the default behavior from the browser
+            // about this specific event, which would instead refresh the page and insert some
+            // querystrings into the address bar
+
+            const url = "https://striveschool-api.herokuapp.com/api/agenda/"
+
+            const myEvent = {
+                description: document.getElementById("description").value,
+                name: document.getElementById("name").value,
+                price: document.getElementById("price").value,
+                time: document.getElementById("time").value
+            }
+
+            // console.log(JSON.stringify(myEvent))
+            try {
+                const response = await fetch(url, {
+                    method: "POST",
+                    // POST method is used for CREATING NEW RESOURCES
+                    body: JSON.stringify(myEvent),
+                    // the body property is the payload of our call,
+                    // so the content we want to carry!
+                    // it must be a STRING
+                    // so our myEvent object needs to be stringified
+                    headers: {
+                        "Content-Type": "application/json",
+                    }
+                    // the headers in an HTTP call are all about meta-information
+                    // we need to pass the "Content-Type" to make our APIs aware
+                    // that our payload is not any string, but it's an object stringified
+                })
+
+                //400 user generated errors
+                //500 server generated errors
+                if (response.ok) {
+                    // if you are here, everything went well => status code 200 ~ 299
+                    const respEvent = await response.json()
+                    alert("Appointment created successfully with an id of " + respEvent._id)
+                } else {
+                    // something went wrong
+
+                    //since fetch will never throw an error except when there's no connection we can rely on response.ok being false and
+                    //deal with status codes by manually throw an exception that will be caught by the catch clause below
+                    if (response.status >= 400 && response.status < 500) {
+                        throw new Error("User generated error, verify the data that you are sending")
+                    } else if (response.status >= 500 && response.status < 600) {
+                        throw new Error("Server generated error, contact the admin to fix this")
+                    }
+                }
+                // ANYTHING HERE WILL BE IGNORED IF AN EXCEPTION IS THROWN
+                console.log("You see me? then no exeption was thrown")
+            } catch (err) {
+                //Every error that happens or gets thrown by us in the try block will be handled here
+                console.lor(err)
+                alert(err.message)
+            } finally {
+                // THIS WILL EXECUTE EVEN IN THE EVENT OF AN ERROR BEING THROWN
+                console.log("You are going to see me every time, no matter what")
+            }
+        }
+
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-Piv4xVNRyMGpqkS2by6br4gNJ7DXjqk09RmUpJ8jgGtD7zP9yug3goQfGII0yAns"
+        crossorigin="anonymous"></script>
+
+
+</body>
+
+</html>
